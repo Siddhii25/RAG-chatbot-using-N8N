@@ -1,0 +1,423 @@
+{
+  "name": "chatbot main",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "55f1a788-d68d-48fa-9652-72344a38aca2",
+      "name": "When chat message received",
+      "webhookId": "8f84b4ed-2f87-45d1-9103-4723cc465bdd"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a professional, friendly, and helpful customer support agent for [Product Name]. When a user asks a question, your job is to:\n\n“Understand the user's intent clearly by analyzing the question.”\n\n“Retrieve relevant documents or knowledge from the RAG tool to gather factual, up-to-date, and accurate information.”\n\n“Generate a concise, clear, and friendly response based only on the retrieved information and any known policies.”\n\n“If the answer is not available or uncertain, admit it honestly and offer to escalate or follow up.”\n\nAlways maintain a polite and empathetic tone. If the user is frustrated, acknowledge their concern and reassure them you're here to help.\n\nIf multiple pieces of information are retrieved, prioritize based on relevance and recency.\n\nDo not hallucinate answers. Only respond with what's retrieved or well-known facts.\n\nUse this structure in your responses:\n\n“Short summary/answer”\n\n“Helpful detail or example if needed”\n\n\"Optional next step, link, or escalation info\"\n\nAlways follow these rules:\n- Do not thank the user for providing information.\n- Assume all knowledge comes from the document, not the user.\n- Respond directly with the most relevant factual answer.\n- Do not invent or hallucinate facts. If the answer is not found, say so politely.\n- Avoid vague or overly general replies—use specifics from the retrieved content."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "3a0bdaa0-eb57-48a4-8b76-d5e904d2856a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        220
+      ],
+      "id": "46f13e25-7ab0-4453-87a1-dd1aef32550b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "jhcbuTIVm6S9zAZS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        200
+      ],
+      "id": "4e71047a-014c-440d-b0a4-2f18e4f8b032",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1R2MUhV6yIxULqK39B42dGAVVdht7IpOp",
+          "mode": "list",
+          "cachedResultName": "DBMS ",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1R2MUhV6yIxULqK39B42dGAVVdht7IpOp"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1140,
+        -40
+      ],
+      "id": "ca195bed-b247-4750-a6e9-0d29feeae69f",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wu0EzUqRLh44PHDF",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -960,
+        -40
+      ],
+      "id": "99381b3e-7015-40ea-82ec-5ee5ccf7679f",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wu0EzUqRLh44PHDF",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "s-index",
+          "mode": "list",
+          "cachedResultName": "s-index"
+        },
+        "options": {
+          "pineconeNamespace": "siddhi-info"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -740,
+        -40
+      ],
+      "id": "10516e86-5cf1-445d-ad48-015eea8e7409",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "iYZ4nrjbn5Rg3WLz",
+          "name": "PineconeApi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        160
+      ],
+      "id": "b5808718-1296-430d-99f4-fffb517e3450",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "jhcbuTIVm6S9zAZS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -600,
+        140
+      ],
+      "id": "6478f855-633e-4c74-8651-77daad255d0a",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        360
+      ],
+      "id": "d71f7501-a2d7-4a7b-afc6-758b4406eabb",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "description": "use this tool to answer user questions"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        380,
+        180
+      ],
+      "id": "2413d2e0-66fa-4729-bf90-68e63cc20e3e",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "s-index",
+          "mode": "list",
+          "cachedResultName": "s-index"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        200,
+        340
+      ],
+      "id": "0e54093f-232b-4071-ab64-d41d09ab04df",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "iYZ4nrjbn5Rg3WLz",
+          "name": "PineconeApi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        220,
+        500
+      ],
+      "id": "5470056b-73ef-4bba-b061-329c10be0d4c",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "jhcbuTIVm6S9zAZS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        520,
+        400
+      ],
+      "id": "eaafd1e4-5a63-414e-bdbb-642892642c43",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "jhcbuTIVm6S9zAZS",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c2c39ba4-3fff-41f1-b5ac-92af655f2a85",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "95a80143e9c0ad57952470e3aa5f485614494fbea0b736f7789a33b7c1192925"
+  },
+  "id": "yapRYRNL8VHEI7pk",
+  "tags": []
+}
